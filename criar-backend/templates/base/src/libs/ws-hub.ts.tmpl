@@ -1,0 +1,41 @@
+import type { WebSocket } from '@fastify/websocket'
+
+// Hub de WebSocket por canal: cada canal agrupa as conexões inscritas nele.
+// Usado para notificar, em um canal privado (o id do recurso), os eventos de atualização.
+class WsHub {
+	private channels = new Map<string, Set<WebSocket>>()
+
+	subscribe(channel: string, socket: WebSocket) {
+		const sockets = this.channels.get(channel) ?? new Set<WebSocket>()
+		sockets.add(socket)
+		this.channels.set(channel, sockets)
+	}
+
+	unsubscribe(channel: string, socket: WebSocket) {
+		const sockets = this.channels.get(channel)
+		if (!sockets) return
+		sockets.delete(socket)
+		if (sockets.size === 0) this.channels.delete(channel)
+	}
+
+	publish(channel: string, payload: unknown) {
+		const sockets = this.channels.get(channel)
+		if (!sockets) return
+		const data = JSON.stringify(payload)
+		for (const socket of sockets) {
+			if (socket.readyState === socket.OPEN) {
+				socket.send(data)
+			}
+		}
+	}
+
+	stats() {
+		let clients = 0
+		for (const sockets of this.channels.values()) {
+			clients += sockets.size
+		}
+		return { channels: this.channels.size, clients }
+	}
+}
+
+export const wsHub = new WsHub()

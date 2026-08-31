@@ -1,0 +1,9 @@
+import fp from 'fastify-plugin'
+import type { FastifyTypedInstance } from '@/types'
+
+export const {{name}}Plugin = fp(async (app: FastifyTypedInstance) => {
+	// TODO: lógica do plugin.
+	// Se decorar a instância (app.decorate('algo', ...)), adicione a tipagem
+	// em src/@types/index.d.ts (declare module 'fastify' -> interface FastifyInstance)
+	// e registre este plugin em src/app.ts dentro de registerPlugins().
+})

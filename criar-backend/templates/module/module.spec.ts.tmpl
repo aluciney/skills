@@ -1,0 +1,39 @@
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals'
+import { App } from '@/app'
+import { {{Module}}DAO } from '@/modules/{{module}}/{{module}}.dao'
+
+// Mock do DAO: os testes não dependem de um banco de dados real.
+jest.mock('@/modules/{{module}}/{{module}}.dao', () => ({
+	{{Module}}DAO: {
+		{{action}}: jest.fn(),
+	},
+}))
+
+describe('Teste de {{module}}', () => {
+	const app = new App()
+
+	beforeAll(async () => {
+		await app.ready()
+	})
+
+	afterAll(async () => {
+		await app.close()
+	})
+
+	describe('POST /api/{{module}}/{{action}}', () => {
+		it('deve responder com sucesso', async () => {
+			jest.mocked({{Module}}DAO.{{action}}).mockResolvedValue({
+				// TODO: retorno simulado do DAO
+			})
+
+			const response = await app.server.inject({
+				method: 'POST',
+				url: '/api/{{module}}/{{action}}',
+				payload: {
+					// TODO: payload de exemplo
+				},
+			})
+			expect(response.statusCode).toBe(200)
+		})
+	})
+})

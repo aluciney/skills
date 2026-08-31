@@ -1,0 +1,11 @@
+import type { Knex } from 'knex'
+import { {{Module}}DAO } from '@/modules/{{module}}/{{module}}.dao'
+
+export class {{Module}}Service {
+	async {{action}}(trx: Knex, props: Record<string, unknown>) {
+		// TODO: regra de negócio do módulo {{module}}
+		const resultado = await {{Module}}DAO.{{action}}({ trx })
+
+		return resultado
+	}
+}

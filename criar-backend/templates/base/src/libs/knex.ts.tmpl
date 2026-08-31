@@ -1,0 +1,11 @@
+import { knexfile } from '@root/knexfile'
+import { knex, type Knex } from 'knex'
+import { attachPaginate } from 'knex-paginate'
+
+attachPaginate()
+
+// Cria uma NOVA instância do Knex. Nenhuma conexão é aberta aqui (pool min: 0):
+// o banco só é acessado na primeira query. Quem cria é responsável por destroy().
+export function createKnex{{DB}}(): Knex {
+	return knex(knexfile.{{db}})
+}

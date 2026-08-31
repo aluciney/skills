@@ -1,0 +1,23 @@
+import type { FastifyRequest } from 'fastify'
+import fp from 'fastify-plugin'
+import { createKnex{{DB}} } from '@/libs/knex'
+
+// Uma instância do Knex por request: criada no onRequest e destruída no fim do request.
+// Sem pool compartilhado entre requests — cada request abre e fecha a própria conexão.
+export const databasePlugin = fp(async (app) => {
+	app.decorateRequest('trx')
+
+	app.addHook('onRequest', async (request) => {
+		// Conexões WebSocket sequestram o reply, então onResponse não dispara e a
+		// instância vazaria. Rotas WS criam a própria instância com createKnex{{DB}}().
+		if (request.headers.upgrade?.toLowerCase() === 'websocket') return
+		request.trx = createKnex{{DB}}()
+	})
+
+	const releaseTrx = async (request: FastifyRequest) => {
+		await request.trx?.destroy()
+	}
+
+	app.addHook('onResponse', releaseTrx)
+	app.addHook('onRequestAbort', releaseTrx)
+})

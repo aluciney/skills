@@ -1,0 +1,14 @@
+import type { Loader } from 'esbuild'
+import { defineConfig } from 'tsup'
+
+const acceptFiles: string[] = ['.html']
+const ignoreFiles = ['!node_modules', '!dist', '!tsup.config.ts']
+
+export default defineConfig({
+	entry: ['**/*.ts', ...acceptFiles.map(file => `**/*${file}`), ...ignoreFiles],
+	outDir: 'dist',
+	clean: true,
+	dts: true,
+	format: ['cjs'],
+	loader: Object.fromEntries(acceptFiles.map(file => [file, 'copy'])) as Record<string, Loader>,
+})

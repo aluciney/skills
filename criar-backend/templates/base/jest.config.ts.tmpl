@@ -1,0 +1,26 @@
+import type { Config } from '@jest/types'
+
+const config: Config.InitialOptions = {
+	preset: 'ts-jest',
+	clearMocks: true,
+	collectCoverage: true,
+	coverageDirectory: 'coverage', // pasta de saída
+	collectCoverageFrom: [
+		'src/**/*.{ts,js}', // arquivos a serem analisados
+		'!src/database/migrations/**.*',
+		'!src/database/seeds/**.*',
+		'!src/database/init/**.*',
+		'!src/**/*.d.ts', // ignora definições de tipo
+		'!src/server.ts', // ignora o ponto de entrada do server
+	],
+	coverageReporters: ['text', 'lcov', 'html'],
+	testEnvironment: 'node',
+	testMatch: ['**/*.test.ts', '**/*.spec.ts'],
+	testTimeout: 5000,
+	moduleNameMapper: {
+		'^@/(.*)$': '<rootDir>/src/$1',
+		'^@root/(.*)$': '<rootDir>/$1',
+	},
+}
+
+export default config

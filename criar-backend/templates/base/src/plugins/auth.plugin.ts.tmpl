@@ -1,0 +1,12 @@
+import fp from 'fastify-plugin'
+import type { FastifyTypedInstance, TypedReply, TypedRequest } from '@/types'
+
+export const authPlugin = fp(async (app: FastifyTypedInstance) => {
+	app.decorate('auth', async (request: TypedRequest, reply: TypedReply) => {
+		try {
+			await request.jwtVerify()
+		} catch {
+			return reply.unauthorized()
+		}
+	})
+})

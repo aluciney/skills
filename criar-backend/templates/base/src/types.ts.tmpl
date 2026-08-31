@@ -1,0 +1,30 @@
+import type { FastifyBaseLogger, FastifyInstance, FastifyReply, FastifyRequest, RawReplyDefaultExpression, RawRequestDefaultExpression, RawServerDefault } from 'fastify'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+
+export type FastifyTypedInstance = FastifyInstance<
+	RawServerDefault,
+	RawRequestDefaultExpression,
+	RawReplyDefaultExpression,
+	FastifyBaseLogger,
+	ZodTypeProvider
+>
+
+export type TypedRequest<T extends import('fastify').RouteGenericInterface = any> = FastifyRequest<
+	T,
+	import('fastify').RawServerDefault,
+	import('fastify').RawRequestDefaultExpression,
+	import('fastify').FastifySchema,
+	ZodTypeProvider,
+	import('fastify').ContextConfigDefault,
+	import('fastify').FastifyBaseLogger
+>
+
+export type TypedReply<T extends import('fastify').RouteGenericInterface = any> = FastifyReply<
+	T,
+	import('fastify').RawServerDefault,
+	import('fastify').RawRequestDefaultExpression,
+	import('fastify').RawReplyDefaultExpression,
+	import('fastify').ContextConfigDefault,
+	import('fastify').FastifySchema,
+	ZodTypeProvider
+>

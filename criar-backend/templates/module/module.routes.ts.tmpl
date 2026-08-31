@@ -1,0 +1,30 @@
+import type { FastifyTypedInstance } from '@/types'
+import { {{Module}}Controller } from '@/modules/{{module}}/{{module}}.controller'
+import { {{Module}}Schema } from '@/modules/{{module}}/{{module}}.schema'
+
+export const {{module}}Routes = (app: FastifyTypedInstance) => {
+	const {{module}}Controller = new {{Module}}Controller()
+
+	// Rota PÚBLICA (sem preHandler)
+	app.post('/{{action}}', {
+		schema: {
+			tags: ['{{module}}'],
+			summary: 'TODO: descrição da rota',
+			body: {{Module}}Schema.{{action}}.Body,
+			response: {{Module}}Schema.{{action}}.Response,
+		},
+		handler: {{module}}Controller.{{action}}.bind({{module}}Controller),
+	})
+
+	// Rota AUTENTICADA — descomente e ajuste quando precisar
+	// app.get('/perfil', {
+	// 	preHandler: [app.auth],
+	// 	schema: {
+	// 		tags: ['{{module}}'],
+	// 		summary: 'TODO: descrição da rota autenticada',
+	// 		security: [{ bearerAuth: [] }],
+	// 		response: {{Module}}Schema.perfil.Response,
+	// 	},
+	// 	handler: {{module}}Controller.perfil.bind({{module}}Controller),
+	// })
+}

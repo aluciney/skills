@@ -1,0 +1,23 @@
+import 'fastify'
+import '@fastify/jwt'
+
+declare module 'fastify' {
+	interface FastifyInstance {
+		auth: preHandlerHookHandler
+	}
+	interface FastifyRequest {
+		// Instância própria deste request, criada pelo database.plugin.
+		// Fica undefined em conexões WebSocket (ver database.plugin.ts).
+		trx: import('knex').Knex
+	}
+}
+declare module '@fastify/jwt' {
+	interface FastifyJWT {
+		user: {
+			id: string
+			nome: string
+			email: string
+			cargo: string | null
+		}
+	}
+}

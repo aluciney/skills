@@ -1,0 +1,18 @@
+import { z } from 'zod'
+
+export const {{Module}}Schema = {
+	{{action}}: {
+		Body: z.object({
+			// TODO: campos do body
+		}),
+		Response: {
+			200: z.object({
+				// TODO: campos da resposta de sucesso
+			}),
+		},
+	},
+} satisfies ModuleSchema
+
+export type {{Module}}SchemaType = {
+	{{action}}: InferModuleSchema<typeof {{Module}}Schema.{{action}}>
+}

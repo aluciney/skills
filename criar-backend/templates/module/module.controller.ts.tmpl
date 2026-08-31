@@ -1,0 +1,16 @@
+import type { {{Module}}SchemaType } from '@/modules/{{module}}/{{module}}.schema'
+import { {{Module}}Service } from '@/modules/{{module}}/{{module}}.service'
+import type { TypedReply, TypedRequest } from '@/types'
+
+const {{module}}Service = new {{Module}}Service()
+
+type {{Action}}Request = {{Module}}SchemaType['{{action}}']
+
+export class {{Module}}Controller {
+	async {{action}}(request: TypedRequest<{{Action}}Request>, reply: TypedReply<{{Action}}Request>) {
+		const trx = request.trx
+		const resultado = await {{module}}Service.{{action}}(trx, request.body)
+
+		return reply.status(200).send(resultado)
+	}
+}
