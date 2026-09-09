@@ -1,7 +1,5 @@
-import type { Knex } from 'knex'
-
 export const {{Module}}DAO = {
-	{{action}}: async (props: { trx: Knex }) => {
+	{{action}}: async (props: IncludeTRX) => {
 		// TODO: acesso a dados do módulo {{module}} usando props.trx
 		return {}
 	},

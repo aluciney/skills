@@ -75,7 +75,9 @@ existe mais — a conexão é do request, não da instância do servidor):
   `{{module}}Service.{{action}}(request.trx, request.body)`.
 - **Service**: recebe `trx: Knex` como primeiro parâmetro e o repassa ao DAO →
   `{{Module}}DAO.{{action}}({ trx })`.
-- **DAO**: todo método recebe `props: { trx: Knex }` e usa `props.trx` para as queries.
+- **DAO**: todo método recebe `props: IncludeTRX<{...}>` (tipo global de `@types/transaction.d.ts`,
+  que soma `{ trx: Knex }` às props do método) e usa `props.trx` para as queries. Sem outras props,
+  use `props: IncludeTRX`.
 - Tipo: use `Knex` (não `Knex.Transaction`), pois `request.trx` é uma instância `Knex`.
 - **Nunca** chame `commit()`/`rollback()`/`destroy()` no controller: `commit`/`rollback` não existem
   numa instância `Knex` (só em `Knex.Transaction`) e o `destroy()` é do plugin. Se a ação precisar de
@@ -134,6 +136,7 @@ para que os testes **não dependam de um banco real**:
     @types/
       index.d.ts         # augmentations (FastifyInstance.auth, FastifyRequest.trx, @fastify/jwt)
       moduleSchema.d.ts  # tipos globais ModuleSchema + InferModuleSchema
+      transaction.d.ts   # tipo global IncludeTRX<T> (injeta { trx: Knex } nas props)
     libs/
       knex.ts            # createKnex{{DB}}(): factory de instância do Knex + knex-paginate
       sema.ts            # InstrumentedSema (semáforo de concorrência)
@@ -221,6 +224,7 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 
 - [ ] Pastas e arquivos no padrão (`{{module}}.{tipo}.ts`, `{{name}}.plugin.ts`).
 - [ ] Schema usa `satisfies ModuleSchema` + `InferModuleSchema` (tipos globais).
+- [ ] DAO tipa as props com `IncludeTRX<...>` (tipo global).
 - [ ] Rotas autenticadas têm `preHandler: [app.auth]` (+ `security` no swagger).
 - [ ] Controller passa `request.trx` ao service; service repassa `{ trx }` ao DAO.
 - [ ] Nenhum `commit()`/`rollback()`/`destroy()` no controller (ciclo de vida é do `database.plugin`).
