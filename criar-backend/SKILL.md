@@ -80,6 +80,15 @@ existe mais — a conexão é do request, não da instância do servidor):
 - **DAO**: todo método recebe `props: IncludeTRX<{...}>` (tipo global de `@types/transaction.d.ts`,
   que soma `{ trx: Knex }` às props do método) e usa `props.trx` para as queries. Sem outras props,
   use `props: IncludeTRX`.
+- **Desestruturação de props**: quando as props tiverem **poucos atributos (até 5, contando o `trx`)**,
+  sempre desestruture na primeira linha da função, com o **`trx` sempre por último**. Vale para DAO,
+  service e qualquer função que receba `props`. Com mais atributos, mantenha `props.<campo>`.
+  ```ts
+  buscar: async (props: IncludeTRX<{ id_cliente: string }>) => {
+  	const { id_cliente, trx } = props
+  	return trx('clientes').where({ id_cliente }).first()
+  },
+  ```
 - Tipo: use `Knex` (não `Knex.Transaction`), pois `request.trx` é uma instância `Knex`.
 - **Nunca** chame `commit()`/`rollback()`/`destroy()` no controller: `commit`/`rollback` não existem
   numa instância `Knex` (só em `Knex.Transaction`) e o `destroy()` é do plugin. Se a ação precisar de
@@ -228,6 +237,7 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Pastas e arquivos no padrão (`{{module}}.{tipo}.ts`, `{{name}}.plugin.ts`).
 - [ ] Schema usa `satisfies ModuleSchema` + `InferModuleSchema` (tipos globais).
 - [ ] DAO tipa as props com `IncludeTRX<...>` (tipo global).
+- [ ] Props com até 5 atributos são desestruturadas (`const { campo, trx } = props`), com `trx` por último.
 - [ ] Rotas autenticadas têm `preHandler: [app.auth]` (+ `security` no swagger).
 - [ ] Controller passa `request.trx` ao service; service repassa `{ trx }` ao DAO.
 - [ ] Nenhum `commit()`/`rollback()`/`destroy()` no controller (ciclo de vida é do `database.plugin`).

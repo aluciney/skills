@@ -1,6 +1,7 @@
 export const {{Module}}DAO = {
 	{{action}}: async (props: IncludeTRX) => {
-		// TODO: acesso a dados do módulo {{module}} usando props.trx
+		const { trx } = props
+		// TODO: acesso a dados do módulo {{module}} usando trx
 		return {}
 	},
 }
