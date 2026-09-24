@@ -82,7 +82,8 @@ existe mais — a conexão é do request, não da instância do servidor):
   use `props: IncludeTRX`.
 - **Desestruturação de props**: quando as props tiverem **poucos atributos (até 5, contando o `trx`)**,
   sempre desestruture na primeira linha da função, com o **`trx` sempre por último**. Vale para DAO,
-  service e qualquer função que receba `props`. Com mais atributos, mantenha `props.<campo>`.
+  service e qualquer função que receba `props`. Com mais atributos, mantenha `props.<campo>`, mas
+  **sempre desestruture o `trx`** (`const { trx } = props`) e use `trx` em vez de `props.trx`.
   ```ts
   buscar: async (props: IncludeTRX<{ id_cliente: string }>) => {
   	const { id_cliente, trx } = props
@@ -237,7 +238,7 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Pastas e arquivos no padrão (`{{module}}.{tipo}.ts`, `{{name}}.plugin.ts`).
 - [ ] Schema usa `satisfies ModuleSchema` + `InferModuleSchema` (tipos globais).
 - [ ] DAO tipa as props com `IncludeTRX<...>` (tipo global).
-- [ ] Props com até 5 atributos são desestruturadas (`const { campo, trx } = props`), com `trx` por último.
+- [ ] Props com até 5 atributos são desestruturadas (`const { campo, trx } = props`), com `trx` por último; com mais, só o `trx` (`const { trx } = props`).
 - [ ] Rotas autenticadas têm `preHandler: [app.auth]` (+ `security` no swagger).
 - [ ] Controller passa `request.trx` ao service; service repassa `{ trx }` ao DAO.
 - [ ] Nenhum `commit()`/`rollback()`/`destroy()` no controller (ciclo de vida é do `database.plugin`).
