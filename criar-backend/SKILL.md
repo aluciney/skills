@@ -8,7 +8,7 @@ description: >-
   ou um plugin Fastify dentro desse padrão. Garante organização de pastas, nomenclatura de
   arquivos, uso dos tipos globais de @types/moduleSchema.d.ts, preHandler [app.auth] em rotas
   autenticadas, registro em router.ts/app.ts e instalação de libs sempre na versão mais atual
-  (exceto oracledb, sempre fixado em 5.4.0).
+  (exceto oracledb, sempre fixado em 5.4.0, e typescript, fixado em ^6).
 ---
 
 # Criar Backend — bootstrap + geração de módulos/plugins
@@ -26,8 +26,10 @@ Stack: **Fastify 5 + fastify-type-provider-zod + Zod 4 + Knex + oracledb**, Type
 Ao adicionar qualquer biblioteca:
 
 - Instale **sempre a versão mais atual**: `npm install <lib>@latest` (use `-D` para devDependencies).
-- **Exceção única:** `oracledb` **sempre fixado em `5.4.0`** (sem `^`): `npm install oracledb@5.4.0`,
+- **Exceções:** `oracledb` **sempre fixado em `5.4.0`** (sem `^`): `npm install oracledb@5.4.0`,
   e confirme que o `package.json` mostra `"oracledb": "5.4.0"`.
+- `typescript` **fixado em `^6`** (`npm install -D typescript@^6`): o `ts-jest` (29.x) só aceita `typescript >=4.3 <7`.
+  Com TS 7 o npm dá `ERESOLVE`. Suba para a última só quando o `ts-jest` passar a suportá-la.
 - Não fixe as outras libs com `=`; mantenha o range `^` que o `npm install` cria.
 - Os templates `package.json` **não trazem versões** de propósito — as deps são instaladas via npm
   para sempre pegar a última.
@@ -159,16 +161,17 @@ para que os testes **não dependam de um banco real**:
 
 1. Pergunte (ou deduza): `{{project}}`, `{{Project}}` e o alias de banco `{{db}}`/`{{DB}}`.
 2. Crie todos os arquivos a partir de `templates/base/` (mantendo a árvore acima), substituindo placeholders.
-3. Instale as dependências (sempre a última versão; oracledb fixo):
+3. Instale as dependências (sempre a última versão; oracledb e typescript fixos):
    ```
    npm install fastify @fastify/cookie @fastify/cors @fastify/helmet @fastify/jwt \
      @fastify/rate-limit @fastify/sensible @fastify/swagger @fastify/swagger-ui \
-     @fastify/websocket fastify-plugin fastify-type-provider-zod  \
-     zod knex knex-paginate async-sema date-fns dotenv tsup@latest
+     @fastify/websocket fastify-plugin fastify-type-provider-zod \
+     zod knex knex-paginate async-sema date-fns dotenv
    npm install oracledb@5.4.0 -E
-   npm install -D typescript tsx ts-node @types/node @biomejs/biome \
+   npm install -D typescript@^6 tsx ts-node tsup @types/node @biomejs/biome \
      jest ts-jest @types/jest
    ```
+   O `tsup` é só ferramenta de build: fica sempre em `devDependencies`, nunca em `dependencies`.
 4. Crie um `.env` a partir de `templates/base/env.example.tmpl`.
 5. Valide com `npx tsc --noEmit`. Suba com `npm run dev`.
 
@@ -230,6 +233,6 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Nenhum `commit()`/`rollback()`/`destroy()` no controller (ciclo de vida é do `database.plugin`).
 - [ ] Spec faz `jest.mock` de cada DAO usado (testes não dependem de banco real).
 - [ ] Módulo registrado no `router.ts`; plugin registrado no `app.ts`.
-- [ ] Libs novas na última versão; `oracledb` fixado em `5.4.0`.
+- [ ] Libs novas na última versão; `oracledb` fixado em `5.4.0`; `typescript` em `^6`; `tsup` em devDependencies.
 - [ ] Todo import usa alias (`@/` para `src/`, `@root/` para a raiz) — sem caminhos relativos.
 - [ ] Indentação com TAB, sem `;`, aspas simples.
