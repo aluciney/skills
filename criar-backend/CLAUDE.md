@@ -27,7 +27,8 @@ de `npm` abaixo pertencem aos **backends gerados**, não a este repo.
 ## Arquitetura dos backends gerados
 
 Stack: **Fastify 5 + fastify-type-provider-zod + Zod 4 + Knex + oracledb**, TypeScript, Jest, Biome.
-Regra de deps: sempre `@latest`, **exceto `oracledb` fixado em `5.4.0`** (sem `^`).
+Regra de deps: sempre `@latest`, **exceto `oracledb` fixado em `5.4.0`** (sem `^`) e **`typescript` em `^6`**
+(o `ts-jest` 29.x não aceita TS 7). `tsup` sempre em `devDependencies`.
 
 **Fluxo de uma requisição** (camadas, do externo ao banco):
 
@@ -36,7 +37,7 @@ routes (Zod schema + preHandler) → controller → service → DAO → Knex
 ```
 
 - **`app.ts`** — classe `App` que monta o servidor numa ordem fixa: `registerCompilers` (Zod) →
-  `registerSecurity` (helmet, rate-limit) → `registerPlugins` (sensible, error-handler, cookie, jwt, cors, auth)
+  `registerSecurity` (helmet, rate-limit) → `registerPlugins` (sensible, error-handler, websocket, database, cookie, jwt, cors, auth)
   → `registerHooks` (semáforo de concorrência via `InstrumentedSema`, libera no `finish`/`close`/`error` do reply)
   → `registerSwagger` → `registerRoutes`. Expõe `ready()`, `listen()`, `close()`.
 - **`router.ts`** — registra os `*Routes` de cada módulo sob o prefixo `/api`.
@@ -51,16 +52,25 @@ routes (Zod schema + preHandler) → controller → service → DAO → Knex
 - `src/types.ts` define `FastifyTypedInstance`, `TypedRequest<T>`, `TypedReply<T>` (Fastify + `ZodTypeProvider`).
   Controllers usam `TypedRequest`/`TypedReply` tipados pela ação do schema.
 
-**Conexão com o banco (regra de fluxo):** a conexão sempre **desce pelo controller**. O controller passa
-`request.server.trx` (instância `Knex` decorada pelo `database.plugin`) como **primeiro argumento** ao service;
-o service repassa `{ trx }` ao DAO; todo método de DAO recebe `props: { trx: Knex }`. Use o tipo `Knex`
-(não `Knex.Transaction`), pois `request.server.trx` é uma instância `Knex`.
+**Conexão com o banco (regra de fluxo):** não há pool compartilhado entre requests — o `database.plugin`
+cria uma instância `Knex` por request (`decorateRequest('trx')` + `onRequest`) e a destrói no
+`onResponse`/`onRequestAbort` (`knexfile.ts` com `pool: { min: 0, max: 1 }`). A conexão sempre **desce pelo
+controller**: o controller passa `request.trx` como **primeiro argumento** ao service; o service repassa
+`{ trx }` ao DAO; todo método de DAO recebe `props: IncludeTRX<{...}>` (tipo global de `@types/transaction.d.ts`).
+Props com até 5 atributos são desestruturadas com `trx` por último; com mais, desestrutura-se só o `trx`.
+Use o tipo `Knex` (não `Knex.Transaction`). Nunca `commit()`/`rollback()`/`destroy()` no controller — para
+transação, `request.trx.transaction(async (t) => { ... })` no service. Rotas WebSocket não recebem `request.trx`:
+criam a própria instância com `createKnex{{DB}}()` e fazem `destroy()` no `close` do socket.
 
 **Autenticação:** rotas protegidas levam `preHandler: [app.auth]` (decorado pelo `auth.plugin`) **antes** do
 `schema`, e `security: [{ bearerAuth: [] }]` dentro do `schema` (reflete no Swagger). Rotas públicas não têm `preHandler`.
 
-**Plugins:** sempre via `fastify-plugin` (`fp`). Se decorarem a instância, a tipagem vai em
-`src/@types/index.d.ts` (`declare module 'fastify'` → `interface FastifyInstance`), e o registro em
+**WebSocket:** `@fastify/websocket` já vem registrado e `src/libs/ws-hub.ts` exporta o singleton `wsHub`
+(`subscribe`/`unsubscribe`/`publish`/`stats`), usando o id do recurso como canal.
+
+**Plugins:** sempre via `fastify-plugin` (`fp`). Se decorarem, a tipagem vai em `src/@types/index.d.ts`
+(`declare module 'fastify'` → `interface FastifyInstance` para `decorate`, `interface FastifyRequest` para
+`decorateRequest`), e o registro em
 `app.ts` → `registerPlugins()` na ordem de dependência.
 
 **Testes:** o `{{module}}.spec.ts` sobe a `App` real e usa `app.server.inject(...)`, mas faz **`jest.mock` do
