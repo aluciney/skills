@@ -87,7 +87,7 @@ existe mais — a conexão é do request, não da instância do servidor):
   ```ts
   buscar: async (props: IncludeTRX<{ id_cliente: string }>) => {
   	const { id_cliente, trx } = props
-  	return trx('clientes').where({ id_cliente }).first()
+  	return trx('cliente').where({ id_cliente }).first()
   },
   ```
 - Tipo: use `Knex` (não `Knex.Transaction`), pois `request.trx` é uma instância `Knex`.
@@ -99,6 +99,20 @@ existe mais — a conexão é do request, não da instância do servidor):
   paralelismo real dentro de um request, aumente o `max` no `knexfile.ts`.
 - Rotas **WebSocket** não recebem `request.trx` (o reply é sequestrado e o `onResponse` não dispara).
   Nelas, chame `createKnex{{DB}}()` e faça `destroy()` no `close` do socket.
+
+### Nomenclatura do banco (tabelas, colunas, chaves)
+
+- Toda **tabela** e **coluna** no **singular**, em **português**, separando palavras com **underline**
+  (`_`) quando preciso. **Nunca abrevie** (`nota_fiscal`, não `nf`; `data_emissao`, não `dt_emissao`).
+- Toda **chave primária** é **UUID v4**, gerado com `v4` da lib `@smithy/uuid`
+  (`import { v4 } from '@smithy/uuid'`), nunca sequence/autoincremento.
+- **Chave estrangeira**: sempre `id_` + nome da tabela referenciada (`id_cliente`, `id_nota_fiscal`).
+
+```ts
+import { v4 } from '@smithy/uuid'
+
+await trx('nota_fiscal').insert({ id: v4(), id_cliente, data_emissao })
+```
 
 ### WebSocket — `wsHub` já disponível em `libs/ws-hub.ts`
 
@@ -176,7 +190,7 @@ para que os testes **não dependam de um banco real**:
    npm install fastify @fastify/cookie @fastify/cors @fastify/helmet @fastify/jwt \
      @fastify/rate-limit @fastify/sensible @fastify/swagger @fastify/swagger-ui \
      @fastify/websocket fastify-plugin fastify-type-provider-zod \
-     zod knex knex-paginate async-sema date-fns dotenv
+     zod knex knex-paginate async-sema date-fns dotenv @smithy/uuid
    npm install oracledb@5.4.0 -E
    npm install -D typescript@^6 tsx ts-node tsup @types/node @biomejs/biome \
      jest ts-jest @types/jest
@@ -239,6 +253,7 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Schema usa `satisfies ModuleSchema` + `InferModuleSchema` (tipos globais).
 - [ ] DAO tipa as props com `IncludeTRX<...>` (tipo global).
 - [ ] Props com até 5 atributos são desestruturadas (`const { campo, trx } = props`), com `trx` por último; com mais, só o `trx` (`const { trx } = props`).
+- [ ] Tabelas/colunas no singular, em português, com `_`, sem abreviação; PK UUID v4 (`v4` de `@smithy/uuid`); FK `id_<tabela>`.
 - [ ] Rotas autenticadas têm `preHandler: [app.auth]` (+ `security` no swagger).
 - [ ] Controller passa `request.trx` ao service; service repassa `{ trx }` ao DAO.
 - [ ] Nenhum `commit()`/`rollback()`/`destroy()` no controller (ciclo de vida é do `database.plugin`).
