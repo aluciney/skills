@@ -152,7 +152,7 @@ para que os testes **não dependam de um banco real**:
 
 ```
 {{project}}/
-  package.json  tsconfig.json  biome.json  jest.config.ts  tsup.config.ts  knexfile.ts  .gitignore
+  CLAUDE.md  package.json  tsconfig.json  biome.json  jest.config.ts  tsup.config.ts  knexfile.ts  .gitignore
   src/
     server.ts            # ponto de entrada (bootstrap da App)
     app.ts               # classe App: compilers, segurança, plugins, hooks, swagger, rotas
@@ -197,7 +197,9 @@ para que os testes **não dependam de um banco real**:
    ```
    O `tsup` é só ferramenta de build: fica sempre em `devDependencies`, nunca em `dependencies`.
 4. Crie um `.env` a partir de `templates/base/env.example.tmpl`.
-5. Valide com `npx tsc --noEmit`. Suba com `npm run dev`.
+5. Crie o `CLAUDE.md` na raiz do projeto a partir de `templates/base/CLAUDE.md.tmpl` (obrigatório):
+   ele instrui que toda alteração futura no backend deve consultar esta skill para manter o padrão.
+6. Valide com `npx tsc --noEmit`. Suba com `npm run dev`.
 
 ## Cenário 2 — Criar um MÓDULO novo
 
@@ -261,4 +263,5 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Módulo registrado no `router.ts`; plugin registrado no `app.ts`.
 - [ ] Libs novas na última versão; `oracledb` fixado em `5.4.0`; `typescript` em `^6`; `tsup` em devDependencies.
 - [ ] Todo import usa alias (`@/` para `src/`, `@root/` para a raiz) — sem caminhos relativos.
+- [ ] Projeto novo tem `CLAUDE.md` na raiz (de `templates/base/CLAUDE.md.tmpl`) apontando para esta skill.
 - [ ] Indentação com TAB, sem `;`, aspas simples.

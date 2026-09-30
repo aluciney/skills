@@ -1,0 +1,25 @@
+# CLAUDE.md
+
+Backend **{{Project}}** (`{{project}}`) — Fastify 5 + fastify-type-provider-zod + Zod 4 + Knex + oracledb, TypeScript, Jest, Biome.
+
+## Regra obrigatória
+
+Este projeto foi criado pela skill **`criar-backend`** e deve seguir o padrão dela.
+**Toda vez que o usuário pedir qualquer alteração neste backend** (novo módulo, rota, endpoint,
+controller, service, dao, schema, teste, plugin, tabela/coluna, dependência, refatoração etc.),
+**invoque/consulte a skill `criar-backend` antes de escrever código** e siga exatamente:
+
+- padrão de código (TAB, sem `;`, aspas simples, imports com alias `@/` e `@root/`);
+- organização de pastas e nomenclatura de arquivos (`src/modules/<modulo>/<modulo>.{schema,routes,controller,service,dao,spec}.ts`, `src/plugins/<nome>.plugin.ts`);
+- estrutura e nomenclatura do banco (tabelas/colunas no singular, português, `_`, PK UUID v4, FK `id_<tabela>`);
+- tipos globais (`ModuleSchema`, `InferModuleSchema`, `IncludeTRX`), `preHandler: [app.auth]` em rotas autenticadas, `trx` vindo do controller;
+- regras de dependências (`@latest`, exceto `oracledb` 5.4.0 e `typescript` ^6);
+- checklist final da skill.
+
+Em caso de dúvida sobre o padrão, a skill é a fonte de verdade — não invente outro.
+
+## Comandos
+
+- `npm run dev` — sobe em modo desenvolvimento
+- `npx tsc --noEmit` — checagem de tipos
+- `npm test` — testes (Jest)

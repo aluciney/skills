@@ -1,6 +1,6 @@
 ---
 name: criar-frontend
-description: Cria um novo projeto frontend com Vite + React + TypeScript, instala libs padrão (axios, date-fns, lucide-react, motion, zod, react-hook-form, @hookform/resolvers, react-router, react-select), configura Tailwind CSS v4 via @tailwindcss/vite, ajusta o index.html (lang pt-BR e meta viewport com maximum-scale=1.0), configura o ESLint para aspas simples e sem ponto e vírgula com formatação automática ao salvar (.vscode/settings.json), monta a estrutura de pastas padrão (components, pages, hooks, services, @types, layouts, contexts, routes) e já deixa o roteamento pronto (App.tsx com RouterProvider, src/routes/index.ts com createBrowserRouter e uma página Home de boas-vindas no tema dark). Use quando o usuário pedir para criar um novo projeto frontend/React/Vite do zero.
+description: Cria um novo projeto frontend com Vite + React + TypeScript, instala libs padrão (axios, date-fns, lucide-react, motion, zod, react-hook-form, @hookform/resolvers, react-router, react-select), configura Tailwind CSS v4 via @tailwindcss/vite, ajusta o index.html (lang pt-BR e meta viewport com maximum-scale=1.0), configura o ESLint para aspas simples e sem ponto e vírgula com formatação automática ao salvar (.vscode/settings.json), monta a estrutura de pastas padrão (components, pages, hooks, services, @types, layouts, contexts, routes) e já deixa o roteamento pronto (App.tsx com RouterProvider, src/routes/index.ts com createBrowserRouter e uma página Home de boas-vindas no tema dark) e cria o CLAUDE.md do projeto apontando para esta skill. Use quando o usuário pedir para criar um novo projeto frontend/React/Vite do zero.
 ---
 
 # Criar Projeto Frontend (Vite + React + TS + Tailwind)
@@ -311,6 +311,40 @@ export const {{Nome}}: React.FC = () => {
 ```
 
 (O `return ()` é literal conforme padrão do usuário — o conteúdo JSX é preenchido em seguida.)
+
+### 14. Criar o `CLAUDE.md` do projeto (obrigatório)
+
+Crie `CLAUDE.md` na raiz do projeto (substitua `<nome-projeto>`) para que qualquer
+alteração futura siga esta skill:
+
+```markdown
+# CLAUDE.md
+
+Frontend **<nome-projeto>** — Vite + React + TypeScript + Tailwind CSS v4.
+
+## Regra obrigatória
+
+Este projeto foi criado pela skill **`criar-frontend`** e deve seguir o padrão dela.
+**Toda vez que o usuário pedir qualquer alteração neste frontend** (novo componente, página,
+hook, service, layout, context, rota, tipagem, dependência, refatoração etc.),
+**invoque/consulte a skill `criar-frontend` antes de escrever código** e siga exatamente:
+
+- padrão de componente/página: `export const Nome: React.FC = () => { ... }` (export nomeado, sem default);
+- organização de pastas e nomenclatura: `components/<Nome>/index.tsx` + `types.ts`, `pages/<Nome>/index.tsx`,
+  `hooks/<nomeHook>.tsx`, `services/<nome>.ts`, `layouts/<Nome>Layout.tsx`, `contexts/<Nome>Context.tsx`,
+  `@types/index.d.ts`, rotas em `routes/index.ts` (`createBrowserRouter` com `Component:`);
+- estilo com Tailwind (tema dark), ícones `lucide-react`, formulários com `react-hook-form` + `zod`, HTTP com `axios`;
+- código com aspas simples e sem `;` (ESLint `@stylistic`);
+- não adicionar bibliotecas além das padrão sem o usuário pedir.
+
+Em caso de dúvida sobre o padrão, a skill é a fonte de verdade — não invente outro.
+
+## Comandos
+
+- `npm run dev` — sobe em modo desenvolvimento
+- `npm run build` — build de produção
+- `npm run lint` — lint (ESLint)
+```
 
 ## Verificação final
 
