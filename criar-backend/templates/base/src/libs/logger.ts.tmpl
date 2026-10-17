@@ -1,0 +1,27 @@
+import { join } from 'node:path'
+import { type Logger, type LoggerOptions, pino } from 'pino'
+import { env } from '@/env'
+
+/**
+ * Em produção grava em arquivo com rotação (pino-roll): logs/<nome>.<data>.<n>.log, um por dia (ou a cada 50 MB),
+ * guardando os 30 mais recentes — a pasta logs é montada como volume no docker-compose. Também escreve no stdout,
+ * para continuar aparecendo no docker logs/Portainer. Em desenvolvimento, só no terminal.
+ */
+export function opcoesLogger(nome: string): LoggerOptions {
+	if (env.NODE_ENV !== 'production') return {}
+	return {
+		transport: {
+			targets: [
+				{ target: 'pino-roll', options: { file: join('logs', nome), frequency: 'daily', dateFormat: 'yyyy-MM-dd', size: '50m', mkdir: true, limit: { count: 30 } } },
+				{ target: 'pino/file', options: { destination: 1 } },
+			],
+		},
+	}
+}
+
+// Logger do processo de workers, criado no primeiro uso (a API usa o logger do Fastify).
+let loggerWorker: Logger | null = null
+export const logWorker = () => {
+	loggerWorker ??= pino(opcoesLogger('worker'))
+	return loggerWorker
+}

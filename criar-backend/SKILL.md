@@ -137,6 +137,28 @@ app.get('/:id/eventos', { websocket: true }, (socket, request) => {
 })
 ```
 
+### Log — `libs/logger.ts` (pino + pino-roll)
+
+O bootstrap inclui `src/libs/logger.ts`, que centraliza a configuração de log:
+
+- **`opcoesLogger(nome)`** — retorna as `LoggerOptions` do pino. Em **desenvolvimento** retorna `{}`
+  (log padrão no terminal). Em **produção** (`NODE_ENV=production`) grava em arquivo com rotação via
+  `pino-roll` — `logs/<nome>.<yyyy-MM-dd>.<n>.log`, um arquivo por dia (ou a cada 50 MB), guardando os
+  30 mais recentes — **e** também no stdout (para aparecer no `docker logs`/Portainer). Em deploy com
+  Docker, monte a pasta `logs` como volume.
+- A **API** usa o logger do próprio Fastify: no `app.ts`, `fastify({ logger: opcoesLogger('api'), ... })`.
+  Dentro de rotas/controllers/services, logue com `request.log` (ou `app.log`) — não crie outro logger.
+- **`logWorker()`** — logger avulso (singleton, criado no primeiro uso) para processos **fora do Fastify**
+  (workers, jobs, scripts), gravando em `logs/worker.*.log`. Para outro processo com arquivo próprio,
+  crie um logger com `pino(opcoesLogger('<nome>'))` seguindo o mesmo padrão.
+- A pasta `logs/` fica no `.gitignore`.
+
+```ts
+import { logWorker } from '@/libs/logger'
+
+logWorker().info({ id_nota_fiscal }, 'nota fiscal processada')
+```
+
 ### Testes (spec) — sempre com `jest.mock` no DAO
 
 No `{{module}}.spec.ts`, sempre que o módulo usar um DAO, faça **`jest.mock` do arquivo do DAO**
@@ -165,6 +187,7 @@ para que os testes **não dependam de um banco real**:
       transaction.d.ts   # tipo global IncludeTRX<T> (injeta { trx: Knex } nas props)
     libs/
       knex.ts            # createKnex{{DB}}(): factory de instância do Knex + knex-paginate
+      logger.ts          # opcoesLogger(nome) (pino; em produção arquivo com rotação via pino-roll) + logWorker()
       sema.ts            # InstrumentedSema (semáforo de concorrência)
       ws-hub.ts          # wsHub: hub de WebSocket por canal (subscribe/unsubscribe/publish)
     plugins/
@@ -190,7 +213,7 @@ para que os testes **não dependam de um banco real**:
    npm install fastify @fastify/cookie @fastify/cors @fastify/helmet @fastify/jwt \
      @fastify/rate-limit @fastify/sensible @fastify/swagger @fastify/swagger-ui \
      @fastify/websocket fastify-plugin fastify-type-provider-zod \
-     zod knex knex-paginate async-sema date-fns dotenv @smithy/uuid
+     zod knex knex-paginate async-sema date-fns dotenv @smithy/uuid pino pino-roll
    npm install oracledb@5.4.0 -E
    npm install -D typescript@^6 tsx ts-node tsup @types/node @biomejs/biome \
      jest ts-jest @types/jest
@@ -264,4 +287,5 @@ Rotas públicas (ex.: login) **não** levam `preHandler`.
 - [ ] Libs novas na última versão; `oracledb` fixado em `5.4.0`; `typescript` em `^6`; `tsup` em devDependencies.
 - [ ] Todo import usa alias (`@/` para `src/`, `@root/` para a raiz) — sem caminhos relativos.
 - [ ] Projeto novo tem `CLAUDE.md` na raiz (de `templates/base/CLAUDE.md.tmpl`) apontando para esta skill.
+- [ ] Logs via `request.log`/`app.log` na API e `logWorker()` (ou `pino(opcoesLogger('<nome>'))`) fora do Fastify — sem `console.log`.
 - [ ] Indentação com TAB, sem `;`, aspas simples.

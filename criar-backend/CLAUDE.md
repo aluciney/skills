@@ -68,6 +68,10 @@ criam a própria instância com `createKnex{{DB}}()` e fazem `destroy()` no `clo
 **WebSocket:** `@fastify/websocket` já vem registrado e `src/libs/ws-hub.ts` exporta o singleton `wsHub`
 (`subscribe`/`unsubscribe`/`publish`/`stats`), usando o id do recurso como canal.
 
+**Log:** `src/libs/logger.ts` exporta `opcoesLogger(nome)` (usado no `app.ts` como `logger: opcoesLogger('api')`) e
+`logWorker()` (processos fora do Fastify). Em dev, log padrão no terminal; em produção, arquivo com rotação via
+`pino-roll` em `logs/<nome>.<data>.<n>.log` (diário ou 50 MB, mantém 30) + stdout. Na API, logue com `request.log`/`app.log`.
+
 **Plugins:** sempre via `fastify-plugin` (`fp`). Se decorarem, a tipagem vai em `src/@types/index.d.ts`
 (`declare module 'fastify'` → `interface FastifyInstance` para `decorate`, `interface FastifyRequest` para
 `decorateRequest`), e o registro em
